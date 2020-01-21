@@ -1,9 +1,24 @@
 #pragma once
 #include "CustomWin.h"
+#include "CustomException.h"
 
 class Window
 {
 private:
+	
+	class Exception : public CustomException
+	{
+	public:
+		Exception(int line, const char* file, HRESULT hr) noexcept;
+		const char* what() const noexcept override;
+		const char* GetType() const noexcept override;
+		static std::string TranslateErrorCode(HRESULT hr) noexcept;
+		HRESULT GetErrorCode() const noexcept;
+		std::string GetErrorString() const noexcept;
+	private:
+		HRESULT hr;
+		
+	};
 	//singleton manages registration/cleanup of window class
 	class WindowClass
 	{
@@ -21,7 +36,7 @@ private:
 		HINSTANCE hInst;
 	};
 public:
-	Window(int width, int height, const wchar_t* name) noexcept;
+	Window(int width, int height, const wchar_t* name);
 	~Window();
 	Window(const Window&) = delete;
 	Window& operator=(const Window&) = delete;
@@ -34,3 +49,7 @@ private:
 	int height;
 	HWND hWnd;
 };
+
+//error exception helper macro
+#define CUWND_EXCEPT ( hr ) Window::Exception(__LINE__,__FILE__,hr)
+#define CUWND_LAST_EXCEPT() Window::Exception(__LINE__,__FILE__,GetLastError())

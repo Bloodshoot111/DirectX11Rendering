@@ -1,5 +1,7 @@
 #include "CustomWin.h"
 #include "Window.h"
+#include "LittleHelpers.h"
+
 
 
 int WINAPI WinMain(
@@ -8,20 +10,38 @@ int WINAPI WinMain(
 	LPSTR lpCmdLine,
 	int nCmdShow)
 {
-	Window wnd(1024, 680, L"DirectX 11 Engine");
+	try {
+		Window wnd(1024, 680, L"DirectX 11 Engine");
 
-	MSG msg;
-	BOOL gResult;
-	while((gResult = GetMessage(&msg,nullptr,0,0)) > 0)
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		MSG msg;
+		BOOL gResult;
+		while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		if (gResult == -1)
+		{
+			return -1;
+		}
+
+		return msg.wParam;
 	}
-
-	if(gResult == -1)
+	catch(const CustomException& e)
 	{
-		return -1;
+		MessageBox(nullptr, LittleHelpers::convertCharToWchar(e.what()), LittleHelpers::convertCharToWchar(e.GetType()), MB_OK |MB_ICONEXCLAMATION);
 	}
-
-	return msg.wParam;
+	catch(const std::exception& e)
+	{
+		MessageBox(nullptr, (LittleHelpers::convertCharToWchar(e.what())), L"Standard Exception", MB_OK | MB_ICONEXCLAMATION);
+	}
+	catch(...)
+	{
+		MessageBox(nullptr, L"No details available", L"Unknown Exception", MB_OK | MB_ICONEXCLAMATION);
+	}
+	return -1;
 }
+
+
+
